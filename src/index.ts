@@ -1,12 +1,26 @@
 import express from 'express';
-import bodyParser from 'body-parser';
-import routes from './infrastructure/api/routes';
+import { BillingRepository } from './infrastructure/persistence/BillingRepository';
 
 const app = express();
-app.use(bodyParser.json());
-app.use('/api', routes);
+const port = 3000;
+const billingRepository = new BillingRepository();
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.get('/billings/:id', async (req, res) => {
+  const billingId = req.params.id;
+  const billing = await billingRepository.findById(billingId);
+
+  if (billing) {
+    res.json(billing);
+  } else {
+    res.status(404).send('Billing not found');
+  }
+});
+
+app.get('/billings', async (req, res) => {
+  const billings = await billingRepository.findAll();
+  res.json(billings);
+});
+
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
 });

@@ -6,15 +6,16 @@ import { Status } from "../domain/Status";
 export class BillingUseCase {
     constructor(private billingService: BillingService) {}
 
-    createBilling(billing: Billing): void {
-        this.billingService.createBilling(billing);
+    async createBilling(billing: Billing): Promise<void> {
+        await this.billingService.createBilling(billing);
     }
 
-    updateBillingStatus(billingId: string, status: Status): void {
-        this.billingService.updateBillingStatus(billingId, status);
+    async updateBillingStatus(billingId: string, status: Status): Promise<void> {
+        await this.billingService.updateBillingStatus(billingId, status);
     }
 
-    getBilling(billingId: string): Billing | null {
-        return this.billingService.getBilling(billingId);
+    async getBilling(billingId: string): Promise<Billing | null> {
+        return this.billingService.getBillingById(billingId);
     }
+
 }

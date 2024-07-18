@@ -1,4 +1,1 @@
-export enum PaymentMethod {
-    EFECTIVO = 'EFECTIVO',
-    TRANSFERENCIA = 'TRANSFERENCIA',
-}
+export type PaymentMethod = 'efectivo' | 'tarjeta' | 'transferencia';

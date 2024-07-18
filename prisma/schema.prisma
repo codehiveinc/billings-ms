@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql" 
+  url      = env("DATABASE_URL")
+}
+
+model Billing {
+  id            String    @id @default(uuid()) @db.Uuid
+  orderId       String
+  paymentMethod PaymentMethod
+  amount        Float
+  paymentDate   DateTime
+  status        Status
+  transactionalId String    @unique
+}
+
+enum PaymentMethod {
+  efectivo
+  tarjeta
+  transferencia
+}
+
+enum Status {
+  pagado
+  pendiente
+  cancelado
+}
