@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import IBillingRepository from "../ports/billing.repository.interface";
 import BillingModel from "../../domain/models/billing.model";
 import PaymentMethodEnum from "../../domain/enums/payment-method.enum";
-import OrderStatusEnum from "../../domain/enums/order-status.enum";
+import StatusEnum from "../../domain/enums/status.enum";
 import { v4 as uuidV4 } from "uuid";
 import CurrencyEnum from "../../domain/enums/currency.enum";
 
@@ -14,13 +14,14 @@ class CreateBillingUseCase {
 
   async execute(
     orderUuid: string,
-    paymentMethod: PaymentMethodEnum
+    paymentMethod: PaymentMethodEnum,
+    paymentReceiptUrl: string | null
   ): Promise<BillingModel> {
     const restaurantUuid = uuidV4();
     const currencyDefault = CurrencyEnum.mxn;
 
     // TODO: Get restaurantUuid and amound from message broker
-    const orderStatusDefault = OrderStatusEnum.confirmed;
+    const orderStatusDefault = StatusEnum.unpaid;
     const amount = 100;
 
     const billing = new BillingModel(
@@ -32,6 +33,7 @@ class CreateBillingUseCase {
       orderStatusDefault,
       amount,
       currencyDefault,
+      paymentReceiptUrl,
       "",
       new Date(),
       new Date()

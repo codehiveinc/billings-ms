@@ -8,17 +8,18 @@ datasource db {
 }
 
 model Billing {
-  id              Int           @id @default(autoincrement())
-  uuid            String        @unique
-  orderUuid       String        @map("order_uuid")
-  restaurantUuid  String        @map("restaurant_uuid")
-  paymentMethod   PaymentMethod @map("payment_method")
-  status          OrderStatus
-  amount          Float
-  currency        Currency
-  transactionalId String?       @unique @map("transactional_id")
-  createdAt       DateTime      @default(now()) @map("created_at")
-  updatedAt       DateTime      @updatedAt @map("updated_at")
+  id                Int           @id @default(autoincrement())
+  uuid              String        @unique
+  orderUuid         String        @map("order_uuid")
+  restaurantUuid    String        @map("restaurant_uuid")
+  paymentMethod     PaymentMethod @map("payment_method")
+  status            Status
+  amount            Float
+  currency          Currency
+  paymentReceiptUrl String?       @map("payment_receipt_url") @db.LongText
+  transactionalId   String?       @unique @map("transactional_id")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
 
   @@map("billings")
 }
@@ -30,12 +31,9 @@ enum PaymentMethod {
   @@map("payment_method")
 }
 
-enum OrderStatus {
-  editing
-  confirmed
-  verified
-  completed
-  canceled
+enum Status {
+  unpaid
+  paid
 
   @@map("order_status")
 }

@@ -1,9 +1,9 @@
-import { Currency, OrderStatus, PaymentMethod } from "@prisma/client";
+import { Currency, PaymentMethod, Status } from "@prisma/client";
 import { prisma } from "../../../../shared/infrastructure/prisma";
 import IBillingRepository from "../../../application/ports/billing.repository.interface";
 import PaymentMethodEnum from "../../../domain/enums/payment-method.enum";
 import BillingModel from "../../../domain/models/billing.model";
-import OrderStatusEnum from "../../../domain/enums/order-status.enum";
+import StatusEnum from "../../../domain/enums/status.enum";
 import CurrencyEnum from "../../../domain/enums/currency.enum";
 import { singleton } from "tsyringe";
 
@@ -19,6 +19,7 @@ class BillingRepository implements IBillingRepository {
         status: this.convertStatus(billing.status),
         amount: billing.amount,
         currency: this.convertCurrency(billing.currency),
+        paymentReceiptUrl: billing.paymentReceiptUrl,
       },
     });
 
@@ -31,6 +32,7 @@ class BillingRepository implements IBillingRepository {
       this.convertStatusEnum(billingCreated.status),
       billingCreated.amount,
       this.convertCurrencyEnum(billingCreated.currency),
+      billingCreated.paymentReceiptUrl,
       billingCreated.transactionalId,
       billingCreated.createdAt,
       billingCreated.updatedAt
@@ -38,12 +40,12 @@ class BillingRepository implements IBillingRepository {
   }
 
   async updateStatus(
-    billingId: number,
-    status: OrderStatusEnum
+    billingId: string,
+    status: StatusEnum
   ): Promise<BillingModel> {
     const billingUpdated = await prisma.billing.update({
       where: {
-        id: billingId,
+        uuid: billingId,
       },
       data: {
         status: this.convertStatus(status),
@@ -59,6 +61,7 @@ class BillingRepository implements IBillingRepository {
       this.convertStatusEnum(billingUpdated.status),
       billingUpdated.amount,
       this.convertCurrencyEnum(billingUpdated.currency),
+      billingUpdated.paymentReceiptUrl,
       billingUpdated.transactionalId,
       billingUpdated.createdAt,
       billingUpdated.updatedAt
@@ -91,35 +94,24 @@ class BillingRepository implements IBillingRepository {
     }
   }
 
-  private convertStatus(status: OrderStatusEnum): OrderStatus {
+  private convertStatus(status: StatusEnum): Status {
     switch (status) {
-      case OrderStatusEnum.editing:
-        return OrderStatus.editing;
-      case OrderStatusEnum.confirmed:
-        return OrderStatus.confirmed;
-      case OrderStatusEnum.verified:
-        return OrderStatus.verified;
-      case OrderStatusEnum.completed:
-        return OrderStatus.completed;
-      case OrderStatusEnum.canceled:
-        return OrderStatus.canceled;
+      case StatusEnum.unpaid:
+        return Status.unpaid;
+      case StatusEnum.paid:
+        return Status.paid;
       default:
         throw new Error("Status not found");
     }
+
   }
 
-  private convertStatusEnum(status: OrderStatus): OrderStatusEnum {
+  private convertStatusEnum(status: Status): StatusEnum {
     switch (status) {
-      case OrderStatus.editing:
-        return OrderStatusEnum.editing;
-      case OrderStatus.confirmed:
-        return OrderStatusEnum.confirmed;
-      case OrderStatus.verified:
-        return OrderStatusEnum.verified;
-      case OrderStatus.completed:
-        return OrderStatusEnum.completed;
-      case OrderStatus.canceled:
-        return OrderStatusEnum.canceled;
+      case Status.unpaid:
+        return StatusEnum.unpaid;
+      case Status.paid:
+        return StatusEnum.paid;
       default:
         throw new Error("Status not found");
     }

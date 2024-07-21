@@ -1,5 +1,5 @@
 import CurrencyEnum from "../enums/currency.enum";
-import OrderStatusEnum from "../enums/order-status.enum";
+import StatusEnum from "../enums/status.enum";
 import PaymentMethodEnum from "../enums/payment-method.enum";
 
 class BillingModel {
@@ -8,9 +8,10 @@ class BillingModel {
   orderUuid: string;
   restaurantUuid: string;
   paymentMethod: PaymentMethodEnum;
-  status: OrderStatusEnum;
+  status: StatusEnum;
   amount: number;
   currency: CurrencyEnum;
+  paymentReceiptUrl: string | null;
   transactionalId: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -21,9 +22,10 @@ class BillingModel {
     orderUuid: string,
     restaurantUuid: string,
     paymentMethod: PaymentMethodEnum,
-    status: OrderStatusEnum,
+    status: StatusEnum,
     amount: number,
     currency: CurrencyEnum,
+    paymentReceiptUrl: string | null,
     transactionalId: string | null,
     createdAt: Date,
     updatedAt: Date
@@ -36,6 +38,7 @@ class BillingModel {
     this.status = status;
     this.amount = amount;
     this.currency = currency;
+    this.paymentReceiptUrl = paymentReceiptUrl;
     this.transactionalId = transactionalId;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
