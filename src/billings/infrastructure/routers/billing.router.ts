@@ -1,14 +1,13 @@
 import { autoInjectable } from "tsyringe";
-import RestBillingHandler from "../handlers/rest-billing.handler";
+import RestBillingHandlers from "../handlers/rest-billing.handlers";
 import { Router } from "express";
 import validateResource from "../../../shared/infrastructure/middlewares/validate-resource.middleware";
 import { CreateBillingSchema, UpdateBillingStatusSchema } from "../schemas/billing.schema";
-import { authenticate } from "../../../shared/infrastructure/middlewares/authenticate.middleware";
 
 @autoInjectable()
 class BillingRouter {
   private router: Router;
-  constructor(private readonly restBillingHandler: RestBillingHandler) {
+  constructor(private readonly restBillingHandler: RestBillingHandlers) {
     this.router = Router();
     this.initializeRoutes();
   }
@@ -16,14 +15,12 @@ class BillingRouter {
   private initializeRoutes() {
     this.router.post(
       "",
-      authenticate,
       validateResource(CreateBillingSchema),
       this.restBillingHandler.createBillingHandler
     );
 
     this.router.put(
       "/:billingUuid/status",
-      authenticate,
       validateResource(UpdateBillingStatusSchema),
       this.restBillingHandler.updateBillingStatusHandler
     );

@@ -5,30 +5,42 @@ import PaymentMethodEnum from "../../domain/enums/payment-method.enum";
 import StatusEnum from "../../domain/enums/status.enum";
 import { v4 as uuidV4 } from "uuid";
 import CurrencyEnum from "../../domain/enums/currency.enum";
+import UpdateAndGetOrderByUuid from "../../../orders/application/use-cases/update-and-get-order-by-uuid";
+
+type GetOrderByUserUuidResponseDto = {
+  totalAmount: number;
+}
 
 @injectable()
 class CreateBillingUseCase {
   constructor(
-    @inject("BillingRepository") private billingRepository: IBillingRepository
+    @inject("BillingRepository") private billingRepository: IBillingRepository,
+    private readonly updateAndGetOrderByUuid: UpdateAndGetOrderByUuid,
   ) {}
 
   async execute(
-    orderUuid: string,
+    userUuid: string,
+    oderUuid: string,
     paymentMethod: PaymentMethodEnum,
     paymentReceiptUrl: string | null
   ): Promise<BillingModel> {
-    const restaurantUuid = uuidV4();
     const currencyDefault = CurrencyEnum.mxn;
-
-    // TODO: Get restaurantUuid and amound from message broker
     const orderStatusDefault = StatusEnum.unpaid;
-    const amount = 100;
+    const billingUuid = uuidV4();
+
+    const sagaMessage = await this.updateAndGetOrderByUuid.execute(oderUuid, billingUuid);
+
+    if (sagaMessage.success === false) {
+      throw new Error("Order not found");
+    }
+
+    const { totalAmount: amount } = sagaMessage.data as GetOrderByUserUuidResponseDto;
+
 
     const billing = new BillingModel(
       0,
-      uuidV4(),
-      orderUuid,
-      restaurantUuid,
+      billingUuid,
+      userUuid,
       paymentMethod,
       orderStatusDefault,
       amount,

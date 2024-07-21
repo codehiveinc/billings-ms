@@ -14,7 +14,6 @@ class BillingRepository implements IBillingRepository {
       data: {
         uuid: billing.uuid,
         orderUuid: billing.orderUuid,
-        restaurantUuid: billing.restaurantUuid,
         paymentMethod: this.convertPaymentMethod(billing.paymentMethod),
         status: this.convertStatus(billing.status),
         amount: billing.amount,
@@ -27,7 +26,6 @@ class BillingRepository implements IBillingRepository {
       billingCreated.id,
       billingCreated.uuid,
       billingCreated.orderUuid,
-      billingCreated.restaurantUuid,
       this.convertPaymentMethodEnum(billingCreated.paymentMethod),
       this.convertStatusEnum(billingCreated.status),
       billingCreated.amount,
@@ -56,7 +54,6 @@ class BillingRepository implements IBillingRepository {
       billingUpdated.id,
       billingUpdated.uuid,
       billingUpdated.orderUuid,
-      billingUpdated.restaurantUuid,
       this.convertPaymentMethodEnum(billingUpdated.paymentMethod),
       this.convertStatusEnum(billingUpdated.status),
       billingUpdated.amount,
@@ -103,7 +100,6 @@ class BillingRepository implements IBillingRepository {
       default:
         throw new Error("Status not found");
     }
-
   }
 
   private convertStatusEnum(status: Status): StatusEnum {

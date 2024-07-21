@@ -4,6 +4,9 @@ import StatusEnum from "../../domain/enums/status.enum";
 
 export const CreateBillingSchema = z.object({
   body: z.object({
+    userUuid: z
+      .string({ required_error: "User UUID is required" })
+      .uuid({ message: "User UUID must be a valid UUID" }),
     orderUuid: z
       .string({ required_error: "Order UUID is required" })
       .uuid({ message: "Order UUID must be a valid UUID" }),

@@ -24,7 +24,9 @@ class MessageBrokerRepository implements IMessageBrokerRepository {
       port: 5671,
     });
     this.channel = await this.connection.createChannel();
-    await this.channel.assertExchange(this.exchange, "direct", { durable: true });
+    await this.channel.assertExchange(this.exchange, "direct", {
+      durable: true,
+    });
   }
 
   async publish(message: SagaMessageModel, routingKey: string): Promise<void> {
@@ -32,7 +34,11 @@ class MessageBrokerRepository implements IMessageBrokerRepository {
       await this.init();
     }
     if (this.channel) {
-      this.channel.publish(this.exchange!, routingKey, Buffer.from(JSON.stringify(message)));
+      this.channel.publish(
+        this.exchange!,
+        routingKey,
+        Buffer.from(JSON.stringify(message))
+      );
       return;
     }
     throw new Error("Channel is not initialized");
@@ -47,14 +53,57 @@ class MessageBrokerRepository implements IMessageBrokerRepository {
     }
 
     if (this.channel) {
-      this.channel.consume(queue, (message) => {
-        if (!message) {
-          return;
-        }
+      this.channel.consume(
+        queue,
+        (message) => {
+          if (!message) {
+            return;
+          }
 
-        callback(JSON.parse(message.content.toString()));
-      }, { noAck: true });
+          callback(JSON.parse(message.content.toString()));
+        },
+        { noAck: true }
+      );
       return;
+    }
+    throw new Error("Channel is not initialized");
+  }
+
+  async publishAndWaitForResponse(
+    message: SagaMessageModel,
+    routingKey: string,
+    callback: (message: SagaMessageModel) => SagaMessageModel,
+    queue: string
+  ): Promise<SagaMessageModel> {
+    const correlationId = message.uuid;
+
+    if (!this.channel) {
+      await this.init();
+    }
+
+    if (this.channel) {
+      this.channel.publish(
+        this.exchange!,
+        routingKey,
+        Buffer.from(JSON.stringify(message))
+      );
+
+      return new Promise((resolve) => {
+        this.channel!.consume(
+          queue,
+          (message) => {
+            if (!message) {
+              return;
+            }
+            const messageParsed = JSON.parse(message.content.toString());
+
+            if (messageParsed.uuid === correlationId) {
+              resolve(callback(messageParsed));
+            }
+          },
+          { noAck: true }
+        );
+      });
     }
     throw new Error("Channel is not initialized");
   }

@@ -3,7 +3,6 @@ CREATE TABLE `billings` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `uuid` VARCHAR(191) NOT NULL,
     `order_uuid` VARCHAR(191) NOT NULL,
-    `restaurant_uuid` VARCHAR(191) NOT NULL,
     `payment_method` ENUM('cash', 'transfer') NOT NULL,
     `status` ENUM('unpaid', 'paid') NOT NULL,
     `amount` DOUBLE NOT NULL,

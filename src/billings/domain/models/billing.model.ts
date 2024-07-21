@@ -6,7 +6,6 @@ class BillingModel {
   id: number;
   uuid: string;
   orderUuid: string;
-  restaurantUuid: string;
   paymentMethod: PaymentMethodEnum;
   status: StatusEnum;
   amount: number;
@@ -20,7 +19,6 @@ class BillingModel {
     id: number,
     uuid: string,
     orderUuid: string,
-    restaurantUuid: string,
     paymentMethod: PaymentMethodEnum,
     status: StatusEnum,
     amount: number,
@@ -33,7 +31,6 @@ class BillingModel {
     this.id = id;
     this.uuid = uuid;
     this.orderUuid = orderUuid;
-    this.restaurantUuid = restaurantUuid;
     this.paymentMethod = paymentMethod;
     this.status = status;
     this.amount = amount;

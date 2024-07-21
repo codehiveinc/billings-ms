@@ -11,7 +11,6 @@ model Billing {
   id                Int           @id @default(autoincrement())
   uuid              String        @unique
   orderUuid         String        @map("order_uuid")
-  restaurantUuid    String        @map("restaurant_uuid")
   paymentMethod     PaymentMethod @map("payment_method")
   status            Status
   amount            Float

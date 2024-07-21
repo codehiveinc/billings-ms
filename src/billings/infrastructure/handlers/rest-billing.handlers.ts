@@ -10,23 +10,25 @@ import createBaseResponse from "../../../shared/infrastructure/utils/createBaseR
 import UpdateBillingStatusUseCase from "../../application/use-cases/update-billing-status.use-case";
 
 @injectable()
-class RestBillingHandler {
+class RestBillingHandlers {
   constructor(
     private readonly createBillingUseCase: CreateBillingUseCase,
     private readonly updateBillingStatusUseCase: UpdateBillingStatusUseCase
   ) {
     this.createBillingHandler = this.createBillingHandler.bind(this);
-    this.updateBillingStatusHandler = this.updateBillingStatusHandler.bind(this);
+    this.updateBillingStatusHandler =
+      this.updateBillingStatusHandler.bind(this);
   }
 
   async createBillingHandler(
     req: Request<unknown, unknown, CreateBillingBodyType>,
     res: Response
   ) {
-    const { orderUuid, paymentMethod, paymentReceiptUrl } = req.body;
+    const { userUuid, orderUuid, paymentMethod, paymentReceiptUrl } = req.body;
 
     try {
       const data = await this.createBillingUseCase.execute(
+        userUuid,
         orderUuid,
         paymentMethod,
         paymentReceiptUrl || null
@@ -41,8 +43,14 @@ class RestBillingHandler {
 
       return res.status(baseResponse.statusCode).json(baseResponse);
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error });
+      const baseResponse = createBaseResponse(
+        null,
+        "Error creating billing",
+        false,
+        500
+      );
+
+      return res.status(baseResponse.statusCode).json(baseResponse);
     }
   }
 
@@ -72,10 +80,16 @@ class RestBillingHandler {
 
       return res.status(baseResponse.statusCode).json(baseResponse);
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error });
+      const baseResponse = createBaseResponse(
+        null,
+        "Error updating billing status",
+        false,
+        500
+      );
+
+      return res.status(baseResponse.statusCode).json(baseResponse);
     }
   }
 }
 
-export default RestBillingHandler;
+export default RestBillingHandlers;
