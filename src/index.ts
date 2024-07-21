@@ -1,68 +1,38 @@
-import express from 'express';
-import { BillingRepository } from './infrastructure/persistence/BillingRepository';
-import { Billing } from './domain/Billing';
-import { createResponse } from './utils/response';
-import { authenticate } from './middleware/auth';
-import { generateToken } from './utils/jwt';
+import "reflect-metadata";
+import "./env";
+import express, { Request, Response } from "express";
+import morganMiddleware from "./shared/infrastructure/middlewares/morgan.middleware";
+import camelCaseMiddleware from "./shared/infrastructure/middlewares/camel-case.middleware";
+import snakeCaseMiddleware from "./shared/infrastructure/middlewares/snake-case.middleware";
+import { container } from "tsyringe";
+import JWTRepository from "./auth/infrastructure/adapters/repositories/jwt.repository";
+import MessageBrokerRepository from "./shared/infrastructure/adapters/repositories/message-broker.repository";
+import { envVariables } from "./env";
+import BillingRepository from "./billings/infrastructure/adapters/repositories/billing.repository";
+import BillingRouter from "./billings/infrastructure/routers/billing.router";
 
 const app = express();
-const port = 3000;
-const billingRepository = new BillingRepository();
+const PORT = envVariables.PORT;
 
-// Middleware para parsear JSON
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morganMiddleware);
 
-app.post('/login', (req, res) => {
-  const { username, password } = req.body;
+app.use(camelCaseMiddleware);
+app.use(snakeCaseMiddleware);
 
-  // Aquí deberías validar el usuario y la contraseña. Esto es solo un ejemplo.
-  if (username === 'admin' && password === 'password') {
-    const token = generateToken({ username });
-    res.json(createResponse({ token }, 'Login successful', true, 200));
-  } else {
-    res.status(401).json(createResponse(null, 'Invalid username or password', false, 401));
-  }
+container.register("JWTRepository", JWTRepository);
+container.register("MessageBrokerRepository", MessageBrokerRepository);
+container.register("BillingRepository", BillingRepository);
+
+const billingsRouter = container.resolve(BillingRouter);
+
+app.use("/api/v1/billings", billingsRouter.getRouter());
+
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({ message: "Everything is working!" });
 });
 
-// Rutas protegidas por JWT
-app.get('/billings/:id', authenticate, async (req, res) => {
-  const billingId = req.params.id;
-  try {
-    const billing = await billingRepository.findById(billingId);
-
-    if (billing) {
-      res.json(createResponse(billing, 'Billing found', true, 200));
-    } else {
-      res.status(404).json(createResponse(null, 'Billing not found', false, 404));
-    }
-  } catch (error) {
-    res.status(500).json(createResponse(null, 'Internal server error', false, 500));
-  }
-});
-
-app.get('/billings', authenticate, async (req, res) => {
-  try {
-    const billings = await billingRepository.findAll();
-    res.json(createResponse(billings, 'Billings retrieved', true, 200));
-  } catch (error) {
-    res.status(500).json(createResponse(null, 'Internal server error', false, 500));
-  }
-});
-
-app.post('/billings', authenticate, async (req, res) => {
-  try {
-    const { orderId, paymentMethod, amount, paymentDate, status, transactionId } = req.body;
-
-    const newBilling = new Billing(orderId, paymentMethod, amount, paymentDate, status, transactionId);
-    await billingRepository.save(newBilling);
-
-    res.status(201).json(createResponse(newBilling, 'Billing created', true, 201));
-  } catch (error) {
-    console.error('Error creating billing:', error);
-    res.status(400).json(createResponse(null, `Error creating billing: ${(error as any).message}`, false, 400));
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });

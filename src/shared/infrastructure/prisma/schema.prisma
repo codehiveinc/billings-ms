@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Billing {
+  id              Int           @id @default(autoincrement())
+  uuid            String        @unique
+  orderUuid       String        @map("order_uuid")
+  restaurantUuid  String        @map("restaurant_uuid")
+  paymentMethod   PaymentMethod @map("payment_method")
+  status          OrderStatus
+  amount          Float
+  currency        Currency
+  transactionalId String?       @unique @map("transactional_id")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  @@map("billings")
+}
+
+enum PaymentMethod {
+  cash
+  transfer
+
+  @@map("payment_method")
+}
+
+enum OrderStatus {
+  editing
+  confirmed
+  verified
+  completed
+  canceled
+
+  @@map("order_status")
+}
+
+enum Currency {
+  usd
+  mxn
+
+  @@map("currency")
+}
